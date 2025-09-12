@@ -1,0 +1,7 @@
+﻿{
+  "host": "127.0.0.1",
+  "port": 5432,
+  "dbname": "mydb",
+  "connect_timeout": 5,
+  "sslmode": "disable"
+}
