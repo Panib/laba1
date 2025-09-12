@@ -1,0 +1,40 @@
+Старт:
+
+cd C:\Users\Danil\laba1
+docker compose up -d
+docker ps --filter "name=pg17"
+
+
+Проверка, что сервер жив:
+docker exec -it pg17 psql -U postgres -d mydb -c "SELECT version();"
+Вывод: PostgreSQL 17.x ...
+
+настройки БД:
+1. ICU-локаль активна (буква i) — и какая фактическая ICU-колляция:
+docker exec -it pg17 psql -U postgres -d mydb -c "SELECT datname, datcollate, datctype, datlocprovider FROM pg_database WHERE datname='mydb';"
+docker exec -it pg17 psql -U postgres -d mydb -c "SELECT pg_database_collation_actual_version(oid) FROM pg_database WHERE datname='mydb';"
+Ищем datlocprovider = i и в actual_version строку с ru-RU.
+
+2.docker exec -it pg17 bash -lc "grep -n 'scram-sha-256' /var/lib/postgresql/data/pg_hba.conf"
+
+
+
+Логин обычным пользователем и права:
+docker exec -it pg17 psql -U app_user -d mydb -c "SELECT current_user, current_database();"
+Вывод:  app_user | mydb
+(Права USAGE на public мы уже выдали init-скриптом.)
+
+
+Дальше 
+cd app
+Copy-Item config.example.json config.json
+py -3 -m venv .venv
+
+py .\main.py
+ (app_user, password)
+
+если с гуи, то py .\main.py --gui
+
+
+безопасность склейки:
+в main.py белый список параметров:

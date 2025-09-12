@@ -79,6 +79,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Проверка запуска без подключения к БД")
     parser.add_argument("--gui", action="store_true", help="Ввод логина/пароля через GUI")
+    parser.add_argument("--user", type=str, help="Логин БД (небезопасно хранить в истории, используйте с осторожностью)")
+    parser.add_argument("--password", type=str, help="Пароль БД (небезопасно хранить в истории, используйте с осторожностью)")
     args = parser.parse_args()
 
     if args.dry_run:
@@ -96,7 +98,10 @@ def main():
         sys.exit(1)
 
     cfg = load_config(config_path)
-    if args.gui:
+
+    if args.user is not None and args.password is not None:
+        user, password = args.user, args.password
+    elif args.gui:
         user, password = prompt_credentials_gui()
     else:
         user, password = prompt_credentials_console()
@@ -109,6 +114,7 @@ def main():
         with conn.cursor() as cur:
             cur.execute("SELECT version();")
             print("PostgreSQL version:\n", cur.fetchone()[0])
+
 
 if __name__ == "__main__":
     main()
